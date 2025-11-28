@@ -19,22 +19,32 @@ class _DosePageState extends State<DosePage> {
 
     if (weight <= 0 || dosePerKg <= 0) {
       setState(() {
-        resultText = 'Ingrese valores válidos';
+        resultText = 'Ingrese valores validos';
       });
       return;
     }
 
     final totalDose = weight * dosePerKg;
 
-    setState(() {
-      resultText =
-        'Peso: ${weight.toStringAsFixed(2)} kg\n'
-        'Limite : ${dosePerKg.toStringAsFixed(2)} mg/kg\n'
-        'Total: ${totalDose.toStringAsFixed(2)} mg';
-    });
+    if (weight > dosePerKg) {
+      final overWeight = weight - dosePerKg;
+      setState(() {
+        resultText =
+            'Peso: ${weight.toStringAsFixed(2)} kg\n'
+            'Limite: ${dosePerKg.toStringAsFixed(2)} mg/kg\n'
+            'Total: ${totalDose.toStringAsFixed(2)} mg\n'
+            'Sobrepeso ${overWeight.toStringAsFixed(2)} kg';
+      });
+    } else {
+      setState(() {
+        resultText =
+            'Peso: ${weight.toStringAsFixed(2)} kg\n'
+            'Limite: ${dosePerKg.toStringAsFixed(2)} mg/kg\n'
+            'Total: ${totalDose.toStringAsFixed(2)} mg\n'
+            'Aprobado';
+      });
+    }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +56,16 @@ class _DosePageState extends State<DosePage> {
           onPressed: () => context.go('/'),
         ),
       ),
-
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Peso en km',
+              'Peso en kg',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            
-
             const SizedBox(height: 16),
-
             TextField(
               decoration: const InputDecoration(
                 labelText: 'Peso (kg)',
@@ -71,12 +76,10 @@ class _DosePageState extends State<DosePage> {
                 weightText = value;
               },
             ),
-
             const SizedBox(height: 16),
-
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Limite',
+                labelText: 'Limite (kg)',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
@@ -84,13 +87,11 @@ class _DosePageState extends State<DosePage> {
                 dosePerKgText = value;
               },
             ),
-
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: calculateDose,
               child: const Text('Calcular'),
             ),
-
             const SizedBox(height: 16),
             Text(resultText),
           ],
