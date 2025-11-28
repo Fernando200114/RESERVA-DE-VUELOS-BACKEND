@@ -15,21 +15,19 @@ class _AverageGradePageState extends State<AverageGradePage> {
   String resultText = '';
 
   void calculateAverage() {
-    final n1 = double.tryParse(n1Text.replaceAll(',', '.')) ?? 0.0;
-    final n2 = double.tryParse(n2Text.replaceAll(',', '.')) ?? 0.0;
- 
+  final total = double.tryParse(n1Text.replaceAll(',', '.')) ?? 0.0;
+  final cantidad = double.tryParse(n2Text.replaceAll(',', '.')) ?? 0.0;
 
+  final promedio = cantidad > 0 ? total / cantidad : 0.0;
 
-    final average = (n1 + n2 ) / 2;
-    final status = average >= 7 ? '' : '';
+  setState(() {
+    resultText =
+      'Total: ${total.toStringAsFixed(2)}\n'
+      'Cantidad de vuelos: ${cantidad.toStringAsFixed(0)}\n'
+      'Promedio: ${promedio.toStringAsFixed(2)}';
+  });
+}
 
-    setState(() {
-      resultText =
-        'total: ${n1.toStringAsFixed(2)}, ${n2.toStringAsFixed(2)}\n'
-        'Promedio: ${average.toStringAsFixed(2)}\n'
-        'Estado: $status';
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
