@@ -60,22 +60,17 @@ jobs:
         # Añadir el host a known_hosts
         ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
    
-    - name: Deploy to VPS
-      env:
-        VPS_HOST: ${{ secrets.VPS_HOST }}
-        VPS_USER: ${{ secrets.VPS_USERNAME }}
-        PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
-        VENV_PATH: ${{ secrets.VENV_PATH }}
+   - name: Deploy to VPS
       run: |
-        ssh -i ~/.ssh/id_rsa $VPS_USER@$VPS_HOST << 'EOF'
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'EOF'
           set -e
           echo '1. Actualizando código...'
-          cd $PROJECT_PATH
+          cd ${{ secrets.PROJECT_PATH }}
           git fetch origin
           git reset --hard origin/main
           
           echo '2. Activando entorno virtual...'
-          source $VENV_PATH/bin/activate
+          source ${{ secrets.VENV_PATH }}/bin/activate
           
           echo '3. Instalando dependencias...'
           pip install -r requirements.txt
