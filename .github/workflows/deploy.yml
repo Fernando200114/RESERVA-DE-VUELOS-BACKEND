@@ -64,20 +64,20 @@ jobs:
           PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
           VENV_PATH: ${{ secrets.VENV_PATH }}
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST "cd $PROJECT_PATH && git fetch origin && git reset --hard origin/main && source $VENV_PATH/bin/activate && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear && sudo systemctl restart gunicorn || true && sudo systemctl restart nginx || true && echo '✅ Despliegue completado'"
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             set -e
-            cd $PROJECT_PATH
+            cd ${{ secrets.PROJECT_PATH }}
             git fetch origin
             git reset --hard origin/main
-
-            source $VENV_PATH/bin/activate
+            
+            source ${{ secrets.VENV_PATH }}/bin/activate
             pip install -r requirements.txt
-
+            
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput --clear
-
+            
             sudo systemctl restart gunicorn || true
             sudo systemctl restart nginx || true
-
+            
             echo "✅ Despliegue completado"
           EOF
