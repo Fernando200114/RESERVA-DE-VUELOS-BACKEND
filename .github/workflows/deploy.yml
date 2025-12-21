@@ -64,7 +64,7 @@ jobs:
           PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
           VENV_PATH: ${{ secrets.VENV_PATH }}
         run: |
-          ssh -i ~/.ssh/id_rsa $VPS_USER@$VPS_HOST << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             set -e
             cd $PROJECT_PATH
             git fetch origin
