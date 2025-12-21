@@ -58,26 +58,21 @@ jobs:
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
-          VENV_PATH: ${{ secrets.VENV_PATH }}
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             set -e
             cd ${{ secrets.PROJECT_PATH }}
             git fetch origin
             git reset --hard origin/main
-            
+
             source ${{ secrets.VENV_PATH }}/bin/activate
             pip install -r requirements.txt
-            
+
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput --clear
-            
+
             sudo systemctl restart gunicorn || true
             sudo systemctl restart nginx || true
-            
+
             echo "✅ Despliegue completado"
           EOF
