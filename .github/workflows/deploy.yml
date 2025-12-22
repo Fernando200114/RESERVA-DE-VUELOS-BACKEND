@@ -48,32 +48,34 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} /bin/bash << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} /bin/bash << 'EOF'
             set -e
-            echo '1. Entrando a la carpeta...'
+            echo '1. Actualizando código...'
             cd ${{ secrets.PROJECT_PATH }}
-            
-            echo '2. Actualizando código desde GitHub...'
             git fetch origin
             git reset --hard origin/main
             
-            echo '3. Instalando dependencias...'
+            echo '2. Activando entorno virtual...'
             source ${{ secrets.VENV_PATH }}/bin/activate
+            
+            echo '3. Instalando dependencias...'
             pip install -r requirements.txt
             
-            echo '4. Base de datos y estáticos...'
+            echo '4. Aplicando migraciones...'
             python manage.py migrate --noinput
+            
+            echo '5. Colectando archivos estáticos...'
             python manage.py collectstatic --noinput --clear
             
-            echo '5. Reiniciando el servidor...'
+            echo '6. Reiniciando servicios...'
             sudo systemctl restart gunicorn
             sudo systemctl restart nginx
             
-            echo '✅ PROYECTO DESPLEGADO CON ÉXITO'
+            echo '✅ Despliegue completado'
           EOF
