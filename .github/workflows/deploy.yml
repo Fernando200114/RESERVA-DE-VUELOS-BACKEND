@@ -44,6 +44,7 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -53,28 +54,26 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} /bin/bash << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} /bin/bash << 'EOF'
             set -e
-            echo '1. Actualizando código...'
+            echo '1. Entrando a la carpeta...'
             cd ${{ secrets.PROJECT_PATH }}
+            
+            echo '2. Actualizando código desde GitHub...'
             git fetch origin
             git reset --hard origin/main
             
-            echo '2. Activando entorno virtual...'
-            source ${{ secrets.VENV_PATH }}/bin/activate
-            
             echo '3. Instalando dependencias...'
+            source ${{ secrets.VENV_PATH }}/bin/activate
             pip install -r requirements.txt
             
-            echo '4. Aplicando migraciones...'
+            echo '4. Base de datos y estáticos...'
             python manage.py migrate --noinput
-            
-            echo '5. Colectando archivos estáticos...'
             python manage.py collectstatic --noinput --clear
             
-            echo '6. Reiniciando servicios...'
+            echo '5. Reiniciando el servidor...'
             sudo systemctl restart gunicorn
             sudo systemctl restart nginx
             
-            echo '✅ Despliegue completado'
+            echo '✅ PROYECTO DESPLEGADO CON ÉXITO'
           EOF
